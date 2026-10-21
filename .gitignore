@@ -27,3 +27,9 @@ scripts/*.png
 scripts/*.mp3
 scripts/*.wav
 scripts/*.ico
+
+# Godot 4 cache & import files
+.godot/
+*.import
+tmp/
+

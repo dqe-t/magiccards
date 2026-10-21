@@ -9,8 +9,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.tts_generator import (
     TTSRequest,
+    build_french_style_prompt,
     resolve_project_id,
     synthesize_speech,
+    validate_french_style_prompt,
     validate_tts_request,
 )
 
@@ -99,3 +101,31 @@ def test_resolve_project_id_missing() -> None:
                 mock_sub.return_value = MagicMock(returncode=1, stdout="")
                 with pytest.raises(ValueError, match="CRITICAL: Google Cloud Project ID is required"):
                     resolve_project_id(None)
+
+
+def test_build_french_style_prompt_happy_path() -> None:
+    res = build_french_style_prompt("Ton joyeux d'instituteur.")
+    assert "Voix en français" in res
+    assert "Prononciation française authentique et naturelle" in res
+    assert "Ton joyeux d'instituteur." in res
+
+
+def test_build_french_style_prompt_empty_failure() -> None:
+    with pytest.raises(ValueError, match="CRITICAL: description must be a non-empty string"):
+        build_french_style_prompt("   ")
+
+
+def test_validate_french_style_prompt_happy_path() -> None:
+    validate_french_style_prompt("Voix en français avec intonation joyeuse.")
+    validate_french_style_prompt("Clear French accent, energetic.")
+
+
+def test_validate_french_style_prompt_missing_language_failure() -> None:
+    with pytest.raises(ValueError, match="CRITICAL: Style prompt must explicitly enforce French language"):
+        validate_french_style_prompt("Warm preschool teacher imitating bear.")
+
+
+def test_validate_french_style_prompt_empty_failure() -> None:
+    with pytest.raises(ValueError, match="CRITICAL: style_prompt must be a non-empty string"):
+        validate_french_style_prompt("")
+

@@ -26,6 +26,25 @@ class TTSRequest:
     sample_rate: int = 44100
 
 
+def build_french_style_prompt(description: str) -> str:
+    """Build a standardized style prompt that strictly enforces French pronunciation."""
+    if not isinstance(description, str) or not description.strip():
+        raise ValueError("CRITICAL: description must be a non-empty string.")
+    return f"Voix en français. Prononciation française authentique et naturelle. {description.strip()}"
+
+
+def validate_french_style_prompt(style_prompt: str) -> None:
+    """Ensure style prompt explicitly requires French language phonetics to prevent American loanword pronunciation."""
+    if not isinstance(style_prompt, str) or not style_prompt.strip():
+        raise ValueError("CRITICAL: style_prompt must be a non-empty string.")
+    lower = style_prompt.lower()
+    if "français" not in lower and "french" not in lower:
+        raise ValueError(
+            "CRITICAL: Style prompt must explicitly enforce French language "
+            "('français' or 'French') to prevent American/English phonetics on loanwords."
+        )
+
+
 def resolve_project_id(explicit_project: str | None = None) -> str:
     if explicit_project is not None and explicit_project.strip():
         return explicit_project.strip()

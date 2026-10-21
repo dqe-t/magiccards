@@ -5,6 +5,7 @@ from typing import Literal
 import pygame
 
 VoiceType = Literal["FEMALE", "MALE"]
+LanguageType = Literal["FR", "EN"]
 
 
 SCORE_ANIMAL_AUDIO_MAP: dict[int, str] = {
@@ -48,6 +49,8 @@ class AudioManager:
         self.animals_dir: Path = base / "animals"
 
         self.current_voice: VoiceType = "FEMALE"
+        self.current_language: LanguageType = "FR"
+        self.available_languages: list[LanguageType] = ["FR"]
 
         self.channel_sfx: pygame.mixer.Channel = pygame.mixer.Channel(0)
         self.channel_voice: pygame.mixer.Channel = pygame.mixer.Channel(1)
@@ -70,12 +73,25 @@ class AudioManager:
             raise ValueError(f"CRITICAL: Unknown voice '{voice}'. Must be 'FEMALE' or 'MALE'.")
         self.current_voice = voice
 
+    def set_language(self, lang: LanguageType) -> None:
+        if lang not in ("FR", "EN"):
+            raise ValueError(f"CRITICAL: Unknown language '{lang}'. Must be 'FR' or 'EN'.")
+        self.current_language = lang
+
+    def set_available_languages(self, langs: list[LanguageType]) -> None:
+        if not langs:
+            raise ValueError("CRITICAL: available_languages cannot be empty.")
+        self.available_languages = list(langs)
+
     def pick_random_voice(self) -> VoiceType:
         chosen: VoiceType = random.choice(["FEMALE", "MALE"])
         self.set_voice(chosen)
         return chosen
 
     def get_active_voice_dir(self) -> Path:
+        if self.current_language == "EN":
+            en_dir = self.assets_dir / "en"
+            return en_dir / "voice_female" if self.current_voice == "FEMALE" else en_dir / "voice_male"
         return self.female_voice_dir if self.current_voice == "FEMALE" else self.male_voice_dir
 
     def resolve_audio_path(
@@ -140,16 +156,28 @@ class AudioManager:
     def is_voice_busy(self) -> bool:
         return self.channel_voice.get_busy()
 
-    def play_animal_sound(self, score: int) -> bool:
+    def play_animal_sound(self, score: int, language: LanguageType | None = None) -> bool:
         if not isinstance(score, int):
             raise TypeError(f"CRITICAL: score must be an int, got {type(score).__name__}")
         if score < 0 or score > 10:
             raise ValueError(f"CRITICAL: score must be between 0 and 10, got {score}")
 
         filename = SCORE_ANIMAL_AUDIO_MAP[score]
-        path = self.animals_dir / filename
+        chosen_lang = language
+        if chosen_lang is None:
+            if len(self.available_languages) > 1:
+                chosen_lang = random.choice(self.available_languages)
+            else:
+                chosen_lang = self.current_language
+
+        sub_dir = "fr" if chosen_lang == "FR" else "en"
+        path = self.animals_dir / sub_dir / filename
         if not path.is_file():
-            raise FileNotFoundError(f"CRITICAL: Animal sound file not found at {path}")
+            fallback_path = self.animals_dir / filename
+            if fallback_path.is_file():
+                path = fallback_path
+            else:
+                raise FileNotFoundError(f"CRITICAL: Animal sound file not found at {path}")
 
         sound = pygame.mixer.Sound(str(path))
         self.channel_voice.play(sound)

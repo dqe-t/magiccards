@@ -20,11 +20,17 @@ class GameConfig:
     )
     ask_letter_names: bool = True
     ask_letter_sounds: bool = False
+    lang_french: bool = True
+    lang_english: bool = False
 
     def validate(self) -> None:
         if not self.ask_letter_names and not self.ask_letter_sounds:
             raise ValueError(
                 "CRITICAL: At least one prompt mode (names or sounds) must be selected."
+            )
+        if not self.lang_french and not self.lang_english:
+            raise ValueError(
+                "CRITICAL: At least one language (French or English) must be selected."
             )
         distinct_symbols = {s.upper() for s in self.selected_symbols}
         if len(distinct_symbols) < MIN_SELECTED_SYMBOLS:
@@ -70,10 +76,14 @@ def _read_config_file(path: Path) -> GameConfig:
             raise ValueError("CRITICAL: 'selected_symbols' must be a list in config.json.")
         ask_names = bool(data.get("ask_letter_names", True))
         ask_sounds = bool(data.get("ask_letter_sounds", False))
+        lang_fr = bool(data.get("lang_french", True))
+        lang_en = bool(data.get("lang_english", False))
         cfg = GameConfig(
             selected_symbols=[str(s) for s in symbols],
             ask_letter_names=ask_names,
             ask_letter_sounds=ask_sounds,
+            lang_french=lang_fr,
+            lang_english=lang_en,
         )
         cfg.validate()
         return cfg
@@ -107,6 +117,8 @@ def save_config(cfg: GameConfig, config_path: Path | None = None) -> Path:
         "selected_symbols": cfg.selected_symbols,
         "ask_letter_names": cfg.ask_letter_names,
         "ask_letter_sounds": cfg.ask_letter_sounds,
+        "lang_french": cfg.lang_french,
+        "lang_english": cfg.lang_english,
     }
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return path

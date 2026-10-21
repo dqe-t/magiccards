@@ -19,6 +19,26 @@ def test_config_defaults_and_validation() -> None:
     assert set(DEFAULT_LETTERS).issubset(set(cfg.selected_symbols))
     assert set(DEFAULT_NUMBERS).issubset(set(cfg.selected_symbols))
     assert len(cfg.selected_symbols) >= 5
+    assert cfg.lang_french is True
+    assert cfg.lang_english is False
+
+
+def test_config_validation_no_language_failure() -> None:
+    cfg = GameConfig(lang_french=False, lang_english=False)
+    with pytest.raises(ValueError, match="CRITICAL: At least one language"):
+        cfg.validate()
+
+
+def test_config_validation_both_languages_happy_path() -> None:
+    cfg = GameConfig(lang_french=True, lang_english=True)
+    cfg.validate()
+    assert cfg.lang_french is True and cfg.lang_english is True
+
+
+def test_config_validation_english_only_happy_path() -> None:
+    cfg = GameConfig(lang_french=False, lang_english=True)
+    cfg.validate()
+    assert cfg.lang_french is False and cfg.lang_english is True
 
 
 def test_config_validation_too_few_symbols() -> None:

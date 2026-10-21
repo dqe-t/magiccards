@@ -21,40 +21,33 @@
 ## 2. Audio & Speech Architecture (Flash Audio)
 
 ### 2.1 Voice Personas & Model Mapping
-* **Letters & Numbers — Female Voice:** `Aoede`
-  * Engine: Gemini 3.8 Flash TTS (`model_name: "gemini-3.8-flash-tts"` via Vertex AI)
-  * Configuration: `prebuiltVoiceConfig: {"voiceName": "Aoede"}`
-  * Tone: Friendly, warm French preschool teacher (*institutrice*), sweet and encouraging.
-  * Active by default in `AudioManager`.
-  * Folder: `assets/audio/voice_female/` (138 clips: 26 letters + 20 numbers × 3 utterance types).
-* **Letters & Numbers — Male Voice:** `Puck`
-  * Engine: Gemini 3.8 Flash TTS (`model_name: "gemini-3.8-flash-tts"` via Vertex AI)
-  * Configuration: `prebuiltVoiceConfig: {"voiceName": "Puck"}`
-  * Tone: Warm, playful, encouraging French male teacher (*instituteur*).
-  * Folder: `assets/audio/voice_male/` (138 clips: 26 letters + 20 numbers × 3 utterance types).
-* **Score Animal Sounds (Result Screen Mascot Audio):** Curated voice persona per animal (`Puck` for deeper/roaring animals like bear, lion, dog, fox, frog; `Aoede` for lighter animals like cat, bunny, duck, sheep, fly, ant).
-  * Engine: Gemini 3.8 Flash TTS (`model_name: "gemini-3.8-flash-tts"` via Vertex AI).
-  * Direct Encoding: High-fidelity natural audio without silence removal filters, maintaining natural breathing, tone, and full sentence clarity.
-  * Audio Content: French animal sound followed immediately by an energetic motivational cheer.
-  * On-Screen Subtitle: Displayed at the bottom of the result screen in very light grey (`#BCBCC8`), small font: `"<French Message> - <English Translation>"`.
-  * Folder: Stored directly in `assets/audio/animals/` (single clean folder, no gender subfolders).
+* **French Voice Personas:**
+  * **Female (`Aoede`):** Warm, encouraging French preschool teacher (*institutrice*). Stored in `assets/audio/voice_female/` (or `assets/audio/fr/voice_female/`).
+  * **Male (`Puck`):** Gentle, friendly French male teacher (*instituteur*). Stored in `assets/audio/voice_male/` (or `assets/audio/fr/voice_male/`).
+* **English Voice Personas:**
+  * **Female (`Kore`):** Warm, clear, cheerful English preschool teacher. Stored in `assets/audio/en/voice_female/`.
+  * **Male (`Fenrir`):** Energetic, clear, supportive English male teacher. Stored in `assets/audio/en/voice_male/`.
+* **Score Animal Sounds (Result Screen Mascot Audio):**
+  * **French Mascot Clips:** Stored in `assets/audio/animals/fr/score_0_ant.mp3` through `score_10_bear.mp3`.
+  * **English Mascot Clips:** Stored in `assets/audio/animals/en/score_0_ant.mp3` through `score_10_bear.mp3`.
+  * **Dual-Language Picking:** When both languages are enabled in Configuration, reward audio randomly picks between French and English per victory screen.
 * **Audio Format:** High-quality MP3 at 192 kbps, 44.1 kHz mono (`-ar 44100 -b:a 192k`).
 
 ### 2.2 Score Mascot Audio & Subtitles Matrix
 
-| Score | Mascot | Voice | Spoken French Audio (MP3) | On-Screen Subtitle (Result Screen Bottom) | Audio File |
-| :---: | :--- | :---: | :--- | :--- | :--- |
-| **0** | **Fourmi** *(Ant)* | `Aoede` | `"Hop, hop ! Courage, réessaie !"` | `Courage, réessaie ! - Don't give up, try again!` | `score_0_ant.mp3` |
-| **1** | **Mouche** *(Fly)* | `Aoede` | `"Bzz, bzz ! Continue, tu peux le faire !"` | `Continue, tu peux le faire ! - Keep going, you can do it!` | `score_1_fly.mp3` |
-| **2** | **Grenouille** *(Frog)* | `Puck` | `"Coâ, coâ ! C'est un bon début !"` | `C'est un bon début ! - That's a good start!` | `score_2_frog.mp3` |
-| **3** | **Canard** *(Duck)* | `Aoede` | `"Coin, coin ! Tu apprends vite !"` | `Tu apprends vite ! - You're learning fast!` | `score_3_duck.mp3` |
-| **4** | **Lapin** *(Bunny)* | `Aoede` | `"Hop, hop ! Continue comme ça !"` | `Continue comme ça ! - Keep it up, you're doing great!` | `score_4_bunny.mp3` |
-| **5** | **Chat** *(Cat)* | `Aoede` | `"Miaou, miaou ! C'est super !"` | `C'est super ! - That's wonderful!` | `score_5_cat.mp3` |
-| **6** | **Chien** *(Dog)* | `Puck` | `"Ouaf, ouaf ! Tu y es presque !"` | `Tu y es presque ! - You're getting there!` | `score_6_dog.mp3` |
-| **7** | **Renard** *(Fox)* | `Puck` | `"Yap, yap ! Bien joué, petit malin !"` | `Bien joué, petit malin ! - Well played, clever one!` | `score_7_fox.mp3` |
-| **8** | **Mouton** *(Sheep)* | `Aoede` | `"Bêê, bêê ! Formidable !"` | `Formidable ! - Fantastic work!` | `score_8_sheep.mp3` |
-| **9** | **Lion** *(Lion)* | `Puck` | `"Rroarrr ! Très bien !"` | `Très bien ! - Very good!` | `score_9_lion.mp3` |
-| **10** | **Ours** *(Bear)* | `Puck` | `"Grroaar ! Parfait !"` | `Parfait ! - Perfect!` | `score_10_bear.mp3` |
+| Score | Mascot | FR Voice | Spoken French Audio | EN Voice | Spoken English Audio | Audio File |
+| :---: | :--- | :---: | :--- | :---: | :--- | :--- |
+| **0** | **Fourmi** *(Ant)* | `Aoede` | `"Hop, hop ! Courage, réessaie !"` | `Kore` | `"Hop, hop ! Don't give up, try again !"` | `score_0_ant.mp3` |
+| **1** | **Mouche** *(Fly)* | `Aoede` | `"Bzz, bzz ! Continue, tu peux le faire !"` | `Kore` | `"Bzz, bzz ! Keep going, you can do it !"` | `score_1_fly.mp3` |
+| **2** | **Grenouille** *(Frog)* | `Puck` | `"Coâ, coâ ! C'est un bon début !"` | `Fenrir` | `"Ribbit, ribbit ! That's a good start !"` | `score_2_frog.mp3` |
+| **3** | **Canard** *(Duck)* | `Aoede` | `"Coin, coin ! Tu apprends vite !"` | `Kore` | `"Quack, quack ! You're learning fast !"` | `score_3_duck.mp3` |
+| **4** | **Lapin** *(Bunny)* | `Aoede` | `"Hop, hop ! Continue comme ça !"` | `Kore` | `"Hop, hop ! Keep it up, you're doing great !"` | `score_4_bunny.mp3` |
+| **5** | **Chat** *(Cat)* | `Aoede` | `"Miaou, miaou ! C'est super !"` | `Kore` | `"Meow, meow ! That's wonderful !"` | `score_5_cat.mp3` |
+| **6** | **Chien** *(Dog)* | `Puck` | `"Ouaf, ouaf ! Tu y es presque !"` | `Fenrir` | `"Woof, woof ! You're getting there !"` | `score_6_dog.mp3` |
+| **7** | **Renard** *(Fox)* | `Puck` | `"Yap, yap ! Bien joué, petit malin !"` | `Fenrir` | `"Yap, yap ! Well played, clever one !"` | `score_7_fox.mp3` |
+| **8** | **Mouton** *(Sheep)* | `Aoede` | `"Bêê, bêê ! Formidable !"` | `Kore` | `"Baa, baa ! Fantastic work !"` | `score_8_sheep.mp3` |
+| **9** | **Lion** *(Lion)* | `Puck` | `"Rroarrr ! Très bien !"` | `Fenrir` | `"Roarrr ! Very good !"` | `score_9_lion.mp3` |
+| **10** | **Ours** *(Bear)* | `Puck` | `"Grroaar ! Parfait !"` | `Fenrir` | `"Grroaar ! Perfect !"` | `score_10_bear.mp3` |
 
 ### 2.3 Emotion & Prompt Prompting Matrix
 Audio files are generated offline via an automated Python batch script. Prompts include delivery instructions to steer vocal expression:
@@ -66,7 +59,17 @@ Audio files are generated offline via an automated Python batch script. Prompts 
 | **Correct Confirmation** | *Extremely happy, enthusiastic, celebratory* | `"Oui, c'est la lettre {symbol} !"` / `"Oui, c'est le chiffre {symbol} !"` | `ans_pos_{type}_{symbol}.mp3` |
 | **Wrong Feedback** | *Gentle, sympathetic, slightly sad but encouraging* | `"Non, c'est la lettre {symbol}."` / `"Non, c'est le chiffre {symbol}."` | `ans_neg_{type}_{symbol}.mp3` |
 
-### 2.3 Audio Playback Pipeline
+#### 2.3.1 Strict French Pronunciation Enforcement
+> [!IMPORTANT]
+> **Gemini Flash TTS English Loanword Pitfall:**
+> When generating audio for French words that also exist as loanwords in English (e.g., *"parfait"*, *"super"*), Gemini 3.8 Flash TTS defaults to American English phonetics (e.g. `/pɑːrˈfeɪ/` instead of `/paʁ.fɛ/`) if the style prompt is written in English or lacks an explicit French phonetic directive.
+> 
+> **Enforcement Contract:**
+> 1. All French style prompts must pass `validate_french_style_prompt()` from `src/tts_generator.py` (which strictly requires explicit French language markers, e.g. `"Voix en français. Prononciation française authentique et naturelle..."`).
+> 2. Helper `build_french_style_prompt()` must be used to wrap prompt descriptions.
+> 3. Words prone to American phonetic confusion (like *"Parfait"*) must include explicit phonetic disambiguation in the prompt: `"Prononciation française soignée du mot « Parfait » avec le son 'è' /paʁfɛ/ et r français, jamais à l'américaine."`
+
+### 2.4 Audio Playback Pipeline
 * **Sound Effects (SFX):**
   * **Correct Click:** Playful bright chime / xylophone glissando (`sfx_correct.wav`).
   * **Wrong Click:** Soft low wooden thud / gentle "boing" (`sfx_wrong.wav`). Never use harsh buzzers.
@@ -253,9 +256,13 @@ print(f"Generated: {saved_path}")
 ```
 
 ### 7.4 Generating Mascot Animal Reward Audio
-To regenerate the curated mascot audio clips (`assets/audio/animals/score_0_ant.mp3` through `score_10_bear.mp3`):
+To regenerate the curated mascot audio clips (`assets/audio/animals/score_0_ant.mp3` through `score_10_bear.mp3`) with strict French pronunciation validation:
 ```bash
+# Regenerate all 11 mascot sounds
 python scripts/generate_short_animal_sounds.py
+
+# Regenerate a specific score (e.g., bear score 10)
+python scripts/generate_short_animal_sounds.py --score 10
 ```
 
 ### 7.5 Direct Flash 3.8 TTS REST API Specification
@@ -325,9 +332,18 @@ Under the hood, `src/tts_generator.py` communicates directly with Google Cloud V
   ```
 
 ### 7.6 Voice Persona Reference
-| Role | Voice Name | Gender | Protobuf `prebuiltVoiceConfig` | Style Tone |
-| :--- | :--- | :--- | :--- | :--- |
-| **Female Voice** | `Aoede` | `FEMALE` | `{"voiceName": "Aoede"}` | Institutrice, douce, bienveillante, invitante |
-| **Male Voice** | `Puck` | `MALE` | `{"voiceName": "Puck"}` | Instituteur, doux, bienveillant, enthousiaste |
+| Language | Role | Voice Name | Gender | Protobuf `prebuiltVoiceConfig` | Style Tone |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **French** | Female Voice | `Aoede` | `FEMALE` | `{"voiceName": "Aoede"}` | Institutrice, douce, bienveillante, invitante |
+| **French** | Male Voice | `Puck` | `MALE` | `{"voiceName": "Puck"}` | Instituteur, doux, bienveillant, enthousiaste |
+| **English** | Female Voice | `Kore` | `FEMALE` | `{"voiceName": "Kore"}` | Preschool teacher, warm, gentle, clear diction |
+| **English** | Male Voice | `Fenrir` | `MALE` | `{"voiceName": "Fenrir"}` | Preschool teacher, energetic, supportive, clear |
+
+### 7.7 Generating English Audio Batch
+To generate all English voice clips (`assets/audio/en/voice_female/` and `assets/audio/en/voice_male/`):
+```bash
+python scripts/generate_all_audio_en.py
+```
+This script generates 26 letters + 20 numbers + 24 phonetics (excluding `X`) × 3 utterance types × 2 voices.
 
 
