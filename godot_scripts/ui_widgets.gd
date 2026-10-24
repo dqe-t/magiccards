@@ -192,8 +192,8 @@ class UIIconButton extends RefCounted:
 		var tex: Texture2D = UIWidgets.get_icon_texture(self.icon_type, icon_sz)
 		if tex != null:
 			var center: Vector2 = draw_rect.get_center()
-			# Optical offset for play triangle
-			var ox: float = float(icon_sz) * 0.04 if self.icon_type == "PLAY" else 0.0
+			# Optical offset for play triangle to achieve visual center of mass
+			var ox: float = -float(icon_sz) * 0.045 if self.icon_type == "PLAY" else 0.0
 			var icon_rect: Rect2 = Rect2(
 				center.x - float(icon_sz) * 0.5 + ox,
 				center.y - float(icon_sz) * 0.5,

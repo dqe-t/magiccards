@@ -7,7 +7,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.tts_generator import (
+from scripts.tts_generator import (
     TTSRequest,
     build_french_style_prompt,
     synthesize_speech,

@@ -1,7 +1,7 @@
 # La Roulette Magique (Les Cartes Magiques) 🎡
 
 Un jeu ludo-éducatif conçu pour apprendre les lettres (majuscules/minuscules, noms et sons phonétiques) et les chiffres (1 à 20) en français pour les jeunes enfants.
-Disponible sous **Godot 4** (compilable vers **Windows**, **Android** et **iOS**) ainsi qu'en version Python originale (`pygame-ce`).
+Développé sous **Godot 4** (compilable vers **Windows**, **Android** et **iOS**).
 
 ---
 

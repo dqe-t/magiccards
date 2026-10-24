@@ -159,42 +159,93 @@ func _test_responsive_layout() -> void:
 
 
 func _test_config_manager() -> void:
-	# Happy path: create, validate, save, and reload config
+	# Happy path 1: Multi-profile creation, switching active profile, rename, save, and reload
 	FailFast.clear_last_error()
 	var test_path: String = "user://test_config_unit.json"
-	var symbols: Array[String] = ["A", "B", "C", "D", "E", "1", "2"]
-	var cfg: ConfigManager.GameConfigData = ConfigManager.GameConfigData.new(symbols, true, true, true, true)
-	assert_true(cfg.validate(), "Valid bilingual config passes validation")
-	assert_true(cfg.lang_french and cfg.lang_english, "Both languages enabled in test config")
-	assert_true(ConfigManager.save_config(cfg, test_path), "Config saves to user://")
+	var default_cfg: ConfigManager.GameConfigData = ConfigManager.create_default_config()
+	assert_true(default_cfg.validate(), "Default config with 6 profiles passes validation")
+	assert_eq_int(default_cfg.profiles.size(), 6, "Default config has exactly 6 profiles")
+	assert_eq_int(default_cfg.active_profile_index, 0, "Initial active profile is index 0")
+	assert_eq_str(default_cfg.profiles[0].name, "Profile 1", "Profile 1 has default name")
+	assert_eq_str(default_cfg.profiles[5].name, "Profile 6", "Profile 6 has default name")
+
+	assert_true(default_cfg.set_active_profile_index(2), "Switches active profile to index 2")
+	assert_eq_int(default_cfg.active_profile_index, 2, "Active profile index updated to 2")
+	assert_true(default_cfg.rename_profile(2, "Luka"), "Renames profile 2 to 'Luka'")
+	assert_eq_str(default_cfg.get_active_profile().name, "Luka", "Active profile name is now 'Luka'")
+
+	default_cfg.selected_symbols = ["A", "B", "C", "D", "E", "1", "2"]
+	default_cfg.ask_letter_sounds = true
+	default_cfg.lang_english = true
+	assert_true(ConfigManager.save_config(default_cfg, test_path), "Multi-profile config saves to disk")
+
 	var loaded: ConfigManager.GameConfigData = ConfigManager.load_config(test_path)
-	assert_eq_int(loaded.selected_symbols.size(), 7, "Loaded config preserves symbol count")
-	assert_true(loaded.ask_letter_names and loaded.ask_letter_sounds, "Loaded config preserves prompt modes")
-	assert_true(loaded.lang_french and loaded.lang_english, "Loaded config preserves language settings")
+	assert_eq_int(loaded.profiles.size(), 6, "Loaded config has 6 profiles")
+	assert_eq_int(loaded.active_profile_index, 2, "Loaded active profile index is preserved")
+	assert_eq_str(loaded.get_active_profile().name, "Luka", "Loaded profile name 'Luka' preserved")
+	assert_eq_int(loaded.selected_symbols.size(), 7, "Loaded profile symbols preserved")
+	assert_true(loaded.ask_letter_sounds, "Loaded profile prompt mode preserved")
+	assert_true(loaded.lang_english, "Loaded profile language preserved")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(test_path))
 
-	# Failure path 1: fewer than 5 distinct case-insensitive symbols
+	# Happy path 2: Legacy single-profile migration to 6 profiles
+	FailFast.clear_last_error()
+	var legacy_path: String = "user://test_legacy_config.json"
+	var legacy_payload: Dictionary = {
+		"selected_symbols": ["A", "O", "U", "I", "E"],
+		"ask_letter_names": true,
+		"ask_letter_sounds": false,
+		"lang_french": true,
+		"lang_english": false
+	}
+	var f: FileAccess = FileAccess.open(legacy_path, FileAccess.WRITE)
+	f.store_string(JSON.stringify(legacy_payload))
+	f.close()
+
+	var migrated: ConfigManager.GameConfigData = ConfigManager.load_config(legacy_path)
+	assert_eq_int(migrated.profiles.size(), 6, "Legacy config migrates to 6 profiles")
+	assert_eq_int(migrated.active_profile_index, 0, "Migrated active profile is index 0")
+	assert_eq_int(migrated.profiles[0].selected_symbols.size(), 5, "Legacy symbols migrated to Profile 1")
+	assert_eq_str(migrated.profiles[1].name, "Profile 2", "Profile 2 initialized with default name")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(legacy_path))
+
+	# Failure path 1: Empty or whitespace profile name
+	FailFast.clear_last_error()
+	var symbols: Array[String] = ["A", "B", "C", "D", "E"]
+	var bad_name_p: ConfigManager.UserProfile = ConfigManager.UserProfile.new("   ", symbols, true, false)
+	assert_false(bad_name_p.validate(), "Rejects empty/whitespace profile name")
+	assert_true(FailFast.has_error(), "FailFast triggered for empty profile name")
+
+	# Failure path 2: Profile index out of bounds
+	FailFast.clear_last_error()
+	assert_false(default_cfg.set_active_profile_index(99), "Rejects active index 99 out of bounds")
+	assert_true(FailFast.has_error(), "FailFast triggered for index out of bounds")
+
+	FailFast.clear_last_error()
+	assert_false(default_cfg.rename_profile(0, "  "), "Rejects blank new name in rename_profile")
+	assert_true(FailFast.has_error(), "FailFast triggered for blank name in rename_profile")
+
+	# Failure path 3: Profile with < 5 distinct symbols or neither prompt mode/language
 	FailFast.clear_last_error()
 	var bad_syms: Array[String] = ["A", "a", "B", "b", "C", "c"]
-	var bad_cfg1: ConfigManager.GameConfigData = ConfigManager.GameConfigData.new(bad_syms, true, false)
-	assert_false(bad_cfg1.validate(), "Rejects < 5 case-insensitive distinct symbols")
+	var bad_p1: ConfigManager.UserProfile = ConfigManager.UserProfile.new("P1", bad_syms, true, false)
+	assert_false(bad_p1.validate(), "Rejects profile with < 5 case-insensitive distinct symbols")
 	assert_true(FailFast.has_error(), "FailFast triggered for < 5 distinct symbols")
 
-	# Failure path 2: neither prompt mode enabled, or no languages enabled
 	FailFast.clear_last_error()
-	var bad_cfg2: ConfigManager.GameConfigData = ConfigManager.GameConfigData.new(symbols, false, false)
-	assert_false(bad_cfg2.validate(), "Rejects config with both prompt modes false")
+	var bad_p2: ConfigManager.UserProfile = ConfigManager.UserProfile.new("P2", symbols, false, false)
+	assert_false(bad_p2.validate(), "Rejects profile with both prompt modes false")
 	assert_true(FailFast.has_error(), "FailFast triggered for no prompt modes")
 
 	FailFast.clear_last_error()
-	var bad_lang_cfg: ConfigManager.GameConfigData = ConfigManager.GameConfigData.new(symbols, true, false, false, false)
-	assert_false(bad_lang_cfg.validate(), "Rejects config with neither French nor English selected")
+	var bad_p3: ConfigManager.UserProfile = ConfigManager.UserProfile.new("P3", symbols, true, false, false, false)
+	assert_false(bad_p3.validate(), "Rejects profile with neither French nor English")
 	assert_true(FailFast.has_error(), "FailFast triggered for no languages")
 
 	FailFast.clear_last_error()
-	var invalid_pool: Array[String] = ["A", "B", "C", "D", "99"]
-	var bad_cfg3: ConfigManager.GameConfigData = ConfigManager.GameConfigData.new(invalid_pool, true, false)
-	assert_false(bad_cfg3.validate(), "Rejects unknown symbol '99'")
+	var bad_sym_pool: Array[String] = ["A", "B", "C", "D", "99"]
+	var bad_p4: ConfigManager.UserProfile = ConfigManager.UserProfile.new("P4", bad_sym_pool, true, false)
+	assert_false(bad_p4.validate(), "Rejects unknown symbol '99'")
 	assert_true(FailFast.has_error(), "FailFast triggered for unknown symbol")
 
 

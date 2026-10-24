@@ -248,11 +248,11 @@ static func compute_config_grid_metrics(viewport_w: int, viewport_h: int, system
 	if g.is_stacked:
 		g.lang_y = g.numbers_y + num_block_h + mode_gap
 		g.mode_y = g.lang_y + g.mode_btn_height + 10
-		g.error_y = mini(viewport_h - 10, g.mode_y + g.mode_btn_height + 12)
+		g.error_y = g.mode_y + g.mode_btn_height + 12
 	else:
-		g.mode_y = mini(viewport_h - g.mode_btn_height - 24, g.numbers_y + num_block_h + mode_gap)
-		g.lang_y = g.mode_y
-		g.error_y = mini(viewport_h - 10, g.mode_y + g.mode_btn_height + maxi(14, int(round(18.0 * mode_scale))))
+		g.lang_y = g.numbers_y + num_block_h + mode_gap
+		g.mode_y = g.lang_y
+		g.error_y = g.mode_y + g.mode_btn_height + maxi(14, int(round(18.0 * mode_scale)))
 
 	g.box_font_size = maxi(16, int(round(float(g.box_size) * 0.50)))
 	g.mode_font_size = maxi(14, int(round(float(g.mode_btn_height) * 0.40)))
@@ -275,21 +275,29 @@ static func compute_menu_metrics(viewport_w: int, viewport_h: int, system_dpi: i
 	var eff_scale: float = base_scale * ui_boost
 
 	var cx: int = viewport_w / 2
-	var cy: int = viewport_h / 2
-	m.title_font_size = clampi(int(round(77.0 * eff_scale)), 36, int(round(float(viewport_h) * 0.105)))
-	var min_title_y: int = maxi(m.title_font_size + 36, int(round(float(viewport_h) * 0.19)))
-	m.title_center = Vector2i(cx, maxi(min_title_y, cy - int(round(250.0 * base_scale))))
 
-	var play_sz: int = clampi(int(round(130.0 * eff_scale)), 96, int(round(float(viewport_h) * 0.21)))
-	var sub_sz: int = clampi(int(round(80.0 * eff_scale)), 64, int(round(float(viewport_h) * 0.135)))
-	var gap: int = maxi(18, int(round(26.0 * base_scale)))
-	var sub_gap: int = maxi(14, int(round(18.0 * base_scale)))
+	var max_title_sz: int = maxi(28, int(round(float(viewport_h) * 0.105)))
+	m.title_font_size = clampi(int(round(77.0 * eff_scale)), 28, max_title_sz)
 
-	var min_play_y: int = m.title_center.y + m.title_font_size / 2 + maxi(28, int(round(48.0 * base_scale)))
-	var play_y: int = maxi(min_play_y, cy - int(round(120.0 * base_scale)))
+	var max_play_sz: int = maxi(56, int(round(float(viewport_h) * 0.22)))
+	var play_sz: int = clampi(int(round(130.0 * eff_scale)), 56, max_play_sz)
+
+	var max_sub_sz: int = maxi(40, int(round(float(viewport_h) * 0.14)))
+	var sub_sz: int = clampi(int(round(80.0 * eff_scale)), 40, max_sub_sz)
+
+	var title_gap: int = clampi(int(round(44.0 * eff_scale)), 12, 48)
+	var gap: int = clampi(int(round(26.0 * eff_scale)), 10, 28)
+	var sub_gap: int = clampi(int(round(18.0 * eff_scale)), 8, 20)
+
+	var total_menu_h: int = m.title_font_size + title_gap + play_sz + gap + sub_sz + sub_gap + sub_sz
+	var start_top_y: int = maxi(14, int(round(float(viewport_h) * 0.23))) if viewport_h >= 900 else maxi(12, (viewport_h - total_menu_h) / 2)
+
+	var title_y: int = start_top_y + m.title_font_size / 2
+	var play_y: int = start_top_y + m.title_font_size + title_gap
 	var config_y: int = play_y + play_sz + gap
 	var quit_y: int = config_y + sub_sz + sub_gap
 
+	m.title_center = Vector2i(cx, title_y)
 	m.play_rect = Rect2i(cx - play_sz / 2, play_y, play_sz, play_sz)
 	m.config_rect = Rect2i(cx - sub_sz / 2, config_y, sub_sz, sub_sz)
 	m.quit_rect = Rect2i(cx - sub_sz / 2, quit_y, sub_sz, sub_sz)

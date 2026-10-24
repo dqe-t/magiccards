@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.tts_generator import TTSRequest, synthesize_speech
+from scripts.tts_generator import TTSRequest, synthesize_speech
 
 EN_CANDIDATE_VOICES: dict[str, str] = {
     "Kore": "FEMALE",

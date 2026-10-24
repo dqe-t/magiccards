@@ -11,6 +11,7 @@ var btn_config: UIWidgets.UIIconButton = null
 var btn_quit: UIWidgets.UIIconButton = null
 var metrics: ResponsiveLayout.MenuMetrics = null
 var anim_time: float = 0.0
+var custom_title: String = ""
 
 
 func _init(
@@ -137,6 +138,29 @@ static func compute_title_char_color(
 	return base_col
 
 
+static func get_default_title() -> String:
+	return "LES CARTES MAGIQUES" if ConfigManager.is_system_french() else "MAGIC CARDS"
+
+
+static func get_title_for_profile_or_system(profile: ConfigManager.UserProfile) -> String:
+	if profile != null:
+		if profile.lang_french and not profile.lang_english:
+			return "LES CARTES MAGIQUES"
+		if profile.lang_english and not profile.lang_french:
+			return "MAGIC CARDS"
+	return get_default_title()
+
+
+func set_custom_title(p_title: String) -> void:
+	self.custom_title = p_title
+
+
+func get_title_text() -> String:
+	if not self.custom_title.is_empty():
+		return self.custom_title
+	return get_default_title()
+
+
 func render(
 	canvas: CanvasItem,
 	fm: FontManager,
@@ -150,7 +174,7 @@ func render(
 
 	canvas.draw_rect(Rect2(0.0, 0.0, float(self.screen_w), float(self.screen_h)), Color.WHITE, true)
 
-	var title_text: String = "LES CARTES MAGIQUES"
+	var title_text: String = get_title_text()
 	var title_font: Font = fm.get_title_font()
 	var fsize: int = self.metrics.title_font_size
 	var full_sz: Vector2 = title_font.get_string_size(title_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize)

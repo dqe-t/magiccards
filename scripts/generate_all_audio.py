@@ -6,7 +6,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.tts_generator import TTSRequest, synthesize_speech
+from scripts.tts_generator import TTSRequest, synthesize_speech
 
 LETTERS: list[str] = [chr(c) for c in range(ord("A"), ord("Z") + 1)]
 NUMBERS: list[str] = [str(n) for n in range(1, 21)]

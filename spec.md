@@ -1,19 +1,24 @@
-# Technical Specification: La Roulette Magique (Windows / Python)
+# Technical Specification: La Roulette Magique (Godot 4)
 
 ## 1. Executive Summary & Tech Stack
 
-* **Operating System:** Windows (Targeting Full Screen Native Resolution)
-* **Control:** Mouse (Left Click)
-* **Core Language:** Python 3.10+
-* **Framework:** `pygame-ce` (Pygame Community Edition)
+* **Operating Systems:** Windows Desktop, Android, and iOS
+* **Control:** Mouse (Left Click on Desktop), Multi-touch (Mobile / Tablets)
+* **Core Engine:** Godot 4 (GDScript, Headless Testing & Export Pipeline)
   * Hardware-accelerated 2D rendering for fluid 60 FPS transitions.
-  * Native full-screen mode (`pygame.FULLSCREEN | pygame.SCALED`).
-  * Low-latency multi-channel audio mixer (`pygame.mixer`).
+  * Adaptive physical dimensioning (27" Desktop, 10" Tablets, 6" Phones).
+  * Low-latency multi-channel audio mixer (`AudioStreamPlayer` / `AudioManager`).
+* **Multi-Profile Configuration Architecture:**
+  * 6 user profile slots (`Profile 1` to `Profile 6` by default).
+  * Each profile independently manages its custom name, selected symbols, prompt modes (letter names / sounds), and languages (French / English).
+  * Seamless active profile switching via top navigation bar and in-app profile renaming dialog.
 * **TTS Engine:** Gemini 3.8 Flash TTS (`gemini-3.8-flash-tts` / Google Cloud Vertex AI & Text-to-Speech API).
   * Account / Project: `martin.luka.ringring@gmail.com` / `project-16e6ffba-6527-45d1-a6c`.
   * Encoded to MP3 at 192 kbps (44.1 kHz).
-  * Pre-generates all audio offline to eliminate runtime API latency and network dependency.
-* **Portability & Distribution:** Bundled into a zero-dependency standalone Windows executable: `les_cartes_magiques.exe` in `dist/les_cartes_magiques/`.
+  * Pre-generates all audio offline via Python tools in `scripts/` to eliminate runtime latency.
+* **Portability & Distribution:**
+  * Windows Standalone Executable: `dist/les_cartes_magiques_godot.exe` (with embedded PCK).
+  * Android APK Package: `dist/les_cartes_magiques.apk`.
 * **Application Icon:** Custom multi-resolution icon (`assets/images/icons/app_icon.ico` and `.png`) featuring three overlapping cards rotated relative to one another (left tilted card 'A', right tilted card '1', and center card with golden magic star '★').
 
 ---

@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.tts_generator import TTSRequest, synthesize_speech
+from scripts.tts_generator import TTSRequest, synthesize_speech
 
 ANIMAL_SOUND_MANIFEST: list[dict[str, str | int]] = [
     {

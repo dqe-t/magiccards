@@ -7,7 +7,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.tts_generator import (
+from scripts.tts_generator import (
     TTSRequest,
     build_french_style_prompt,
     resolve_project_id,
@@ -37,9 +37,9 @@ def test_synthesize_speech_happy_path(tmp_path: Path) -> None:
     mock_creds = MagicMock()
     mock_creds.token = "fake-token"
 
-    with patch("src.tts_generator.google.auth.default", return_value=(mock_creds, "mock-proj")):
-        with patch("src.tts_generator.requests.post", return_value=mock_resp) as mock_post:
-            with patch("src.tts_generator.subprocess.run") as mock_sub:
+    with patch("scripts.tts_generator.google.auth.default", return_value=(mock_creds, "mock-proj")):
+        with patch("scripts.tts_generator.requests.post", return_value=mock_resp) as mock_post:
+            with patch("scripts.tts_generator.subprocess.run") as mock_sub:
                 mock_sub.return_value = MagicMock(returncode=0, stderr="")
                 request = TTSRequest(
                     text="Bonjour !",
@@ -82,8 +82,8 @@ def test_synthesize_speech_api_error(tmp_path: Path) -> None:
     mock_creds = MagicMock()
     mock_creds.token = "fake-token"
 
-    with patch("src.tts_generator.google.auth.default", return_value=(mock_creds, "mock-proj")):
-        with patch("src.tts_generator.requests.post", return_value=mock_resp):
+    with patch("scripts.tts_generator.google.auth.default", return_value=(mock_creds, "mock-proj")):
+        with patch("scripts.tts_generator.requests.post", return_value=mock_resp):
             request = TTSRequest(
                 text="Bonjour",
                 output_path=tmp_path / "err.mp3",
@@ -96,8 +96,8 @@ def test_synthesize_speech_api_error(tmp_path: Path) -> None:
 
 def test_resolve_project_id_missing() -> None:
     with patch.dict(os.environ, {}, clear=True):
-        with patch("src.tts_generator.google.auth.default", side_effect=Exception("no auth")):
-            with patch("src.tts_generator.subprocess.run") as mock_sub:
+        with patch("scripts.tts_generator.google.auth.default", side_effect=Exception("no auth")):
+            with patch("scripts.tts_generator.subprocess.run") as mock_sub:
                 mock_sub.return_value = MagicMock(returncode=1, stdout="")
                 with pytest.raises(ValueError, match="CRITICAL: Google Cloud Project ID is required"):
                     resolve_project_id(None)

@@ -39,13 +39,16 @@ func _ready() -> void:
 		_init_hand_cursor()
 
 	self.menu_view = MainMenuView.new(self.screen_w, self.screen_h, self.system_dpi, self.override_diag_inches)
+	var active_p: ConfigManager.UserProfile = self.config.get_active_profile()
+	self.menu_view.set_custom_title(MainMenuView.get_title_for_profile_or_system(active_p))
 	self.config_view = ConfigView.new(
 		self.screen_w,
 		self.screen_h,
 		self.system_dpi,
 		self.override_diag_inches,
 		self.config,
-		ConfigManager.DEFAULT_USER_CONFIG_PATH
+		ConfigManager.DEFAULT_USER_CONFIG_PATH,
+		self
 	)
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 
@@ -66,8 +69,15 @@ func _parse_cli_args() -> void:
 	var i: int = 0
 	while i < all_args.size():
 		var arg: String = all_args[i]
-		if arg == "--windowed":
+		if arg == "--windowed" or arg == "-w":
 			use_windowed = true
+		elif arg == "--resolution" and i + 1 < all_args.size():
+			var parts: PackedStringArray = all_args[i + 1].split("x")
+			if parts.size() == 2:
+				req_w = int(parts[0])
+				req_h = int(parts[1])
+				use_windowed = true
+			i += 1
 		elif arg == "--width" and i + 1 < all_args.size():
 			req_w = int(all_args[i + 1])
 			i += 1
@@ -79,10 +89,21 @@ func _parse_cli_args() -> void:
 			i += 1
 		i += 1
 
-	if use_windowed:
+	if use_windowed or (req_w > 0 and req_h > 0):
+		var win: Window = get_window()
+		if win != null:
+			win.mode = Window.MODE_WINDOWED
+			win.borderless = false
+			if req_w > 0 and req_h > 0:
+				win.size = Vector2i(req_w, req_h)
+				var scr_sz: Vector2i = DisplayServer.screen_get_size()
+				win.position = Vector2i(maxi(0, (scr_sz.x - req_w) / 2), maxi(0, (scr_sz.y - req_h) / 2))
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
 		if req_w > 0 and req_h > 0:
 			DisplayServer.window_set_size(Vector2i(req_w, req_h))
+			self.screen_w = req_w
+			self.screen_h = req_h
 
 
 func _init_hand_cursor() -> void:
@@ -146,6 +167,15 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var mm: InputEventMouseMotion = event
 		self.mouse_pos = Vector2i(mm.position)
+		if self.is_mouse_down and self.current_state == "CONFIG" and self.config_view != null:
+			self.config_view.handle_drag(mm.relative, self.mouse_pos)
+
+	elif event is InputEventScreenDrag:
+		var sd: InputEventScreenDrag = event
+		self.is_touch_device = true
+		self.mouse_pos = Vector2i(sd.position)
+		if self.current_state == "CONFIG" and self.config_view != null:
+			self.config_view.handle_drag(sd.relative, self.mouse_pos)
 
 	elif event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
@@ -153,15 +183,34 @@ func _input(event: InputEvent) -> void:
 			self.mouse_pos = Vector2i(mb.position)
 			self.is_mouse_down = mb.pressed
 			if mb.pressed:
-				_dispatch_click(self.mouse_pos)
+				if self.current_state != "CONFIG":
+					_dispatch_click(self.mouse_pos)
+			else:
+				if self.current_state == "CONFIG" and self.config_view != null:
+					var was_dragging: bool = self.config_view.handle_drag_end()
+					if not was_dragging:
+						_dispatch_click(self.mouse_pos)
+		elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			if self.current_state == "CONFIG" and self.config_view != null:
+				self.config_view.handle_wheel(-1, self.mouse_pos)
+		elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			if self.current_state == "CONFIG" and self.config_view != null:
+				self.config_view.handle_wheel(1, self.mouse_pos)
 
 	elif event is InputEventScreenTouch:
 		var st: InputEventScreenTouch = event
 		self.is_touch_device = true
 		self.mouse_pos = Vector2i(st.position)
 		self.is_mouse_down = st.pressed
-		if st.pressed and not Input.is_emulating_mouse_from_touch():
-			_dispatch_click(self.mouse_pos)
+		if not Input.is_emulating_mouse_from_touch():
+			if st.pressed:
+				if self.current_state != "CONFIG":
+					_dispatch_click(self.mouse_pos)
+			else:
+				if self.current_state == "CONFIG" and self.config_view != null:
+					var was_dragging: bool = self.config_view.handle_drag_end()
+					if not was_dragging:
+						_dispatch_click(self.mouse_pos)
 
 
 func _dispatch_click(pos: Vector2i) -> void:
@@ -192,6 +241,9 @@ func _transition_to(action: String) -> void:
 			self.score_view = null
 		if self.am != null:
 			self.am.stop_all()
+		if self.menu_view != null and self.config != null:
+			var act_p: ConfigManager.UserProfile = self.config.get_active_profile()
+			self.menu_view.set_custom_title(MainMenuView.get_title_for_profile_or_system(act_p))
 		self.current_state = "MENU"
 	elif action == "CONFIG":
 		if self.score_view != null:
@@ -203,7 +255,8 @@ func _transition_to(action: String) -> void:
 			self.system_dpi,
 			self.override_diag_inches,
 			self.config,
-			ConfigManager.DEFAULT_USER_CONFIG_PATH
+			ConfigManager.DEFAULT_USER_CONFIG_PATH,
+			self
 		)
 		self.current_state = "CONFIG"
 	elif action == "PLAY":

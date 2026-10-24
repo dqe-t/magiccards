@@ -6,7 +6,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.tts_generator import TTSRequest, synthesize_speech
+from scripts.tts_generator import TTSRequest, synthesize_speech
 
 ALL_PHONETIC_LETTERS: list[str] = [
     "A", "B", "C", "D", "E", "F", "G", "I", "J", "K", "L", "M",
