@@ -1,46 +1,48 @@
-# La Roulette Magique (Les Cartes Magiques) 🎡
+# La Roulette Magique (Magic Cards) 🎡
 
-Un jeu ludo-éducatif conçu pour apprendre les lettres (majuscules/minuscules, noms et sons phonétiques) et les chiffres (1 à 20) en français pour les jeunes enfants.
-Développé sous **Godot 4** (compilable vers **Windows**, **Android** et **iOS**).
+An educational game designed to help young children learn letters (uppercase/lowercase, letter names, and phonetic sounds) and numbers (1 to 20) with bilingual French and English voice support.  
+Developed in **Godot 4** (exportable to **Windows**, **Android**, and **iOS**).
 
 ---
 
-## ✨ Fonctionnalités & Ergonomie Multi-Écrans
+## ✨ Features & Multi-Screen Ergonomics
 
-* **Dimensionnement Physique Adaptatif (27" Desktop, Tablette 10", Téléphone) :**
-  * **Plafond « Vraie Carte à Jouer » sur Grand Écran (27") :** Sur un moniteur 27 pouces, les cartes conservent leur taille idéale d'origine (`210×290 px` en 1080p, soit $\approx 65 \times 90\text{ mm}$, la taille réelle d'une carte à jouer).
-  * **Taille Unifiée Définie par 5 Cartes sur Écrans Plus Petits :** Sur les écrans plus petits (tablettes, téléphones), la taille des cartes est déterminée par l'espace disponible pour 5 cartes. Cette taille reste rigoureusement identique que la manche en cours affiche 3, 4 ou 5 cartes.
-  * **Grille de Configuration Tactile Adaptative :** Sur grand moniteur, les 26 lettres s'affichent sur une seule ligne ; sur tablette et téléphone, elles se répartissent automatiquement sur deux rangées de 13 (et deux rangées de 10 pour les chiffres) pour des cibles tactiles confortables au doigt.
-* **Support Tactile & Souris Natif :** Fonctionne à la souris (avec curseur main personnalisé sur PC) et au toucher sur Android/iOS, avec gestion du bouton Retour Android et de la touche `Échap (ESC)`.
+* **Physical Adaptive Scaling (27" Desktop, 10" Tablet, 6" Phone):**
+  * **"Real Playing Card" Ceiling on Large Displays (27"):** On a 27-inch monitor, cards maintain their ideal physical size (`210×290 px` at 1080p, $\approx 65 \times 90\text{ mm}$, the exact dimensions of a real playing card).
+  * **Unified Card Size on Smaller Screens:** On tablets and mobile phones, card size is determined by the screen width available for 5 cards. This size remains strictly consistent whether 3, 4, or 5 cards are dealt.
+  * **Adaptive Touch Configuration Grid:** On desktop monitors, all 26 letters fit on a single row; on tablets and phones, letters automatically wrap into two rows of 13 (and numbers into two rows of 10) for comfortable, child-friendly touch targets.
+* **Native Touch & Mouse Support:** Smooth operation via mouse (with custom hand cursor on desktop) and multi-touch on Android/iOS, including full handling for the Android hardware Back button and keyboard `Escape (ESC)`.
 
 ---
 
 ## 🎮 Running & Testing
 
-### 1. Lancer le jeu en mode développement
+### 1. Launch the Game in Development Mode
 ```powershell
-# Plein écran natif
+# Native fullscreen
 godot_console.exe --path .
 
-# Mode fenêtré ou simulation d'un écran physique (ex. tablette 10.1 pouces)
+# Windowed simulation for a physical screen size (e.g., 10.1-inch tablet)
 godot_console.exe --path . -- --windowed --width 1280 --height 800 --screen-inches 10.1
+
+# 6-inch phone simulation shortcut
+.\run_phone_6inch.bat
 ```
 
-### 2. Exécuter les tests unitaires Godot (Headless)
+### 2. Run Headless Godot Unit Tests
 ```powershell
 godot_console.exe --headless --path . -s res://tests/godot/test_runner.gd
 ```
 
 ---
 
-## 📦 Compilation & Distribution Autonome
+## 📦 Export & Distribution
 
-### 1. Prérequis : Modèles d'exportation Godot (Export Templates)
-Avant de compiler un exécutable ou un package mobile, téléchargez les modèles correspondant à votre version de Godot (ici Godot 4.7.2) :
-* **Via l'Éditeur Godot :** Ouvrez Godot, allez dans `Projet` -> `Gérer les modèles d'exportation...`, puis cliquez sur `Télécharger et installer`.
-* **Ou via la ligne de commande :**
+### 1. Prerequisites: Godot Export Templates
+Before exporting binaries, download and install the export templates matching your Godot engine version (Godot 4.7.2):
+* **Via Godot Editor:** Navigate to `Project` -> `Manage Export Templates...`, then click `Download and Install`.
+* **Via PowerShell CLI:**
   ```powershell
-  # Téléchargement et installation automatique des templates
   $ver = "4.7.2.stable"
   $dest = "$env:APPDATA\Godot\export_templates\$ver"
   New-Item -ItemType Directory -Force -Path $dest | Out-Null
@@ -52,91 +54,90 @@ Avant de compiler un exécutable ou un package mobile, téléchargez les modèle
 
 ---
 
-### 2. Compiler pour Windows (.exe autonome)
+### 2. Export for Windows (.exe Standalone)
 
-Le preset `Windows Desktop` est configuré dans `export_presets.cfg` avec l'option `embed_pck=true` (ce qui intègre toutes les ressources directement dans le `.exe`).
+The `Windows Desktop` preset in `export_presets.cfg` is configured with `binary_format/embed_pck=true`, bundling all game data directly into the executable.
 
 ```powershell
-# Créer le répertoire de sortie
+# Create output directory
 New-Item -ItemType Directory -Force -Path dist | Out-Null
 
-# Compiler l'exécutable autonome
+# Export standalone executable
 godot_console.exe --headless --path . --export-release "Windows Desktop" dist/les_cartes_magiques_godot.exe
 ```
 
-Le fichier autonome `dist/les_cartes_magiques_godot.exe` peut ensuite être distribué et lancé directement sans dépendance externe.
+The resulting standalone executable `dist/les_cartes_magiques_godot.exe` can be distributed and launched without external dependencies.
 
 ---
 
-### 3. Compiler pour Android (.apk & .aab)
+### 3. Export for Android (.apk & .aab)
 
-#### Prérequis spécifiques à Android :
-1. **Android SDK & Command-line Tools :**
-   * Installez Android Studio ou les `cmdline-tools` (SDK Platforms 33/34 et Build-tools).
-2. **OpenJDK 17 :** Installé et disponible dans le `PATH`.
-3. **Clé de signature de débogage (debug keystore) ou de release :**
-   * Pour le débogage :
+#### Android Prerequisites:
+1. **Android SDK & Command-line Tools:** Android SDK platforms 33/34 and build-tools installed via Android Studio or command-line tools.
+2. **OpenJDK 17:** Installed and configured in `PATH` / `JAVA_HOME`.
+3. **Signing Keystores:**
+   * **For Debug:**
      ```powershell
      keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
      ```
-   * Pour la release (Google Play Store), le script `scripts/build_aab.py` provisionne automatiquement `output/keystores/release.keystore`.
+   * **For Release:** `scripts/build_aab.py` automatically provisions `output/keystores/release.keystore`.
 
-#### Compilation de l'APK (Installation directe / Débogage / Sideloading) :
-Le preset `Android APK` est configuré avec l'architecture `arm64-v8a` par défaut pour une taille optimisée (~58 Mo).
+#### Build Standalone APK (Direct Install / Sideloading / Debugging):
+The `Android APK` preset targets `arm64-v8a` by default for a lean, optimized binary (~158 MB).
 ```powershell
 godot_console.exe --headless --path . --export-release "Android APK" dist/les_cartes_magiques.apk
 ```
-Pour installer directement sur un appareil ou émulateur Android connecté par USB :
+Install directly to a USB-connected Android device or emulator:
 ```powershell
 adb install -r dist/les_cartes_magiques.apk
 ```
 
-#### Compilation de l'Android App Bundle (.aab pour Google Play Store) :
+#### Build Android App Bundle (.aab for Google Play Store):
 ```powershell
 python scripts/build_aab.py
 ```
-Le bundle final optimisé (~59 Mo) est automatiquement compilé et copié dans `play_store_assets/les_cartes_magiques.aab`.
+The optimized release bundle (~109 MB) is automatically built and staged into `play_store_assets/les_cartes_magiques.aab`.
 
 ---
 
-### 4. Compiler pour iOS (.ipa / Projet Xcode)
+### 4. Export for iOS (.ipa / Xcode Project)
 
-Pour compiler vers iOS, une machine sous macOS équipée de Xcode est nécessaire :
+Building for iOS requires a macOS machine with Xcode:
 ```bash
-# Génère le projet Xcode complet dans dist/ios/
+# Generate full Xcode project in dist/ios/
 mkdir -p dist/ios
 godot --headless --path . --export-release "iOS" dist/ios/les_cartes_magiques.ipa
 ```
-Ouvrez ensuite le projet généré dans Xcode pour le signer avec votre compte développeur Apple et le déployer sur iPhone/iPad.
+Open the generated project in Xcode to sign it with your Apple Developer account and deploy to iPhone/iPad devices.
 
 ---
 
-## 🗜️ Optimisation de la Taille des Paquets & Gestion des Médias Originaux
+## 🗜️ Package Size Optimization & Master Asset Preservation
 
-Le projet intègre une stratégie ciblée de réduction de taille sans compromis sur la qualité visuelle :
+The project employs a targeted size-reduction strategy that minimizes mobile download and installation footprints without compromising visual or acoustic quality.
 
-### 1. Synthèse des Optimisations Appliquées
+### 1. Optimization Summary
 
-| Composant | Avant | Après | Statut & Arbitrage Qualité |
-| :--- | :--- | :--- | :--- |
-| **Vidéos Récompenses (`.ogv`)** | 58.7 Mo | **58.7 Mo** | **Qualité native préservée :** compression Theora désactivée pour éviter tout artefact de compression visuel sur les animations. |
-| **Clips Vocaux (`.mp3`)** | 62.5 Mo | **21.3 Mo** | **Gain majeur (-41 Mo / -66%) :** 874 fichiers vocaux ré-encodés en mono 64 kbps (qualité vocale transparente sans perte perceptible). |
-| **Dépollution Export (`tmp/*`)** | 6.2 Mo | **0 Mo** | **Gain de 6.2 Mo (-100%) :** exclusion systématique des vidéos et captures de test dans `export_presets.cfg`. |
-| **Architecture Native (`.so`)** | 72.7 Mo (3 ABIs) | **23.3 Mo** | **Gain de 49 Mo (-68%) :** ciblage `arm64-v8a` par défaut pour l'APK direct (évite de tripler le poids du moteur). |
+| Component | Before | After | Savings | Strategy & Settings |
+| :--- | :--- | :--- | :--- | :--- |
+| **Reward Videos (`.ogv`)** | 58.7 MB | **58.7 MB** | **0 MB (Preserved)** | **Native quality preserved:** Theora re-compression is skipped to prevent color fringing and macroblock artifacts on 2D animations. |
+| **Voice Clips (`.mp3`)** | 62.5 MB | **21.3 MB** | **-41.2 MB (-66%)** | 874 voice clips re-encoded to 64 kbps mono (transparent voice fidelity for speech). |
+| **Export Sanitization (`tmp/*`)** | 6.2 MB | **0.0 MB** | **-6.2 MB (-100%)** | Work directories and test artifacts excluded in `export_presets.cfg`. |
+| **Native Architecture (`.so`)** | 72.7 MB (3 ABIs) | **23.3 MB** | **-49.4 MB (-68%)** | Default `arm64-v8a` target in standalone APK (eliminates redundant 32-bit and x86 runtimes). |
 
-### 2. Préservation des Médias Originaux Haute Définition (`assets_original/`)
+### 2. High-Quality Master Preservation (`assets_original/`)
 
-Afin de garantir la pérennité des assets :
-* **Emplacement des masters :** Tous les fichiers sources audio et vidéo sont archivés intacts dans `assets_original/` (`assets_original/videos/` et `assets_original/audio/`).
-* **Protection Godot via `.gdignore` :** Le fichier `assets_original/.gdignore` signale au moteur Godot d'ignorer ce répertoire lors de l'indexation de l'éditeur et lors de l'exportation des paquets.
-* **Pipeline d'optimisation automatisé :** En cas d'ajout de nouvelles voix, l'optimisation audio se relance en une seule commande (sans toucher aux vidéos) :
+To guarantee that master audio and video source files are never lost:
+* **Master Location:** All pristine source audio and video files are archived in `assets_original/` (`assets_original/videos/` and `assets_original/audio/`).
+* **Godot Scanner Protection via `.gdignore`:** The file `assets_original/.gdignore` instructs Godot's asset scanner and exporter to completely ignore this directory during editor imports and packaging.
+* **Automated Optimization Pipeline:** If new voice clips are generated (via `generate_all_audio.py` or `tts_generator.py`), the optimization pipeline can be re-run with:
   ```powershell
   python scripts/optimize_assets.py
   ```
 
 ---
 
-## 🐍 Version Python Originale
+## 🐍 Original Python Prototype
 ```powershell
 pip install -r requirements.txt
 python main.py
