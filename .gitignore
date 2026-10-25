@@ -27,6 +27,11 @@ scripts/*.png
 scripts/*.mp3
 scripts/*.wav
 scripts/*.ico
+*.keystore
+.gradle/
+android/
+play_store_assets/*.aab
+play_store_assets/*.apk
 
 # Godot 4 cache & import files
 .godot/

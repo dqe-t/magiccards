@@ -230,8 +230,8 @@ static func compute_config_grid_metrics(viewport_w: int, viewport_h: int, system
 
 	var mode_scale: float = float(g.box_size) / 46.0
 	g.mode_btn_height = clampi(int(round(42.0 * mode_scale if diag_in <= 12.0 else 48.0 * mode_scale)), 44, 118)
-	g.lang_btn_width = clampi(int(round(240.0 * mode_scale)), 170, 320)
-	g.mode_btn_width = clampi(int(round(340.0 * mode_scale)), 220, 460)
+	g.lang_btn_width = mini(viewport_w - 40, clampi(int(round(260.0 * mode_scale)), 170, 620))
+	g.mode_btn_width = mini(viewport_w - 40, clampi(int(round(420.0 * mode_scale)), 240, 920))
 	g.mode_spacing = clampi(int(round(20.0 * mode_scale)), 12, 36)
 
 	var total_dual_w: int = g.lang_btn_width + g.mode_spacing + g.mode_btn_width
@@ -255,7 +255,7 @@ static func compute_config_grid_metrics(viewport_w: int, viewport_h: int, system
 		g.error_y = g.mode_y + g.mode_btn_height + maxi(14, int(round(18.0 * mode_scale)))
 
 	g.box_font_size = maxi(16, int(round(float(g.box_size) * 0.50)))
-	g.mode_font_size = maxi(14, int(round(float(g.mode_btn_height) * 0.40)))
+	g.mode_font_size = maxi(14, int(round(float(g.mode_btn_height) * 0.35)))
 	return g
 
 

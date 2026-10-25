@@ -109,6 +109,8 @@ func _test_responsive_layout() -> void:
 	var cg_s23: ResponsiveLayout.ConfigGridMetrics = ResponsiveLayout.compute_config_grid_metrics(2340, 1080, 480, 0.0)
 	assert_eq_int(cg27.columns_per_row, 26, "27-inch desktop uses 26 columns per row")
 	assert_eq_int(cg10.columns_per_row, 13, "10-inch tablet auto-wraps to 13 columns per row")
+	assert_true(cg10.lang_btn_width >= 480, "10-inch tablet language toggle is wide enough for font size")
+	assert_true(cg10.mode_btn_width >= 750, "10-inch tablet mode toggle is wide enough for French/English labels")
 	assert_eq_int(cg_s23.columns_per_row, 13, "Samsung S23 auto-wraps to 13 columns per row")
 	assert_true(cg_s23.box_size >= 115, "Samsung S23 config checkboxes are large and touch-friendly (>= 115px)")
 	assert_true(cg_s23.mode_btn_height >= 90, "Samsung S23 config mode buttons are tall and touch-friendly (>= 90px)")

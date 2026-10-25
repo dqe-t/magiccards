@@ -9,7 +9,10 @@ def isolate_user_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, request
 
     fake_appdata = tmp_path / "appdata"
     fake_appdata.mkdir(parents=True, exist_ok=True)
-    import src.config as cfg_mod
+    try:
+        import src.config as cfg_mod
+    except ImportError:
+        return
 
     monkeypatch.setattr(cfg_mod, "get_user_config_dir", lambda: fake_appdata / "LaRouletteMagique")
     monkeypatch.setattr(

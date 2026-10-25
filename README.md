@@ -68,32 +68,34 @@ Le fichier autonome `dist/les_cartes_magiques_godot.exe` peut ensuite être dist
 
 ---
 
-### 3. Compiler pour Android (.apk)
+### 3. Compiler pour Android (.apk & .aab)
 
 #### Prérequis spécifiques à Android :
 1. **Android SDK & Command-line Tools :**
    * Installez Android Studio ou les `cmdline-tools` (SDK Platforms 33/34 et Build-tools).
 2. **OpenJDK 17 :** Installé et disponible dans le `PATH`.
-3. **Clé de signature de débogage (debug keystore) :**
-   Si vous n'en avez pas encore, générez une clé debug standard :
-   ```powershell
-   keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
-   ```
-4. **Configurer les chemins dans Godot :**
-   Dans l'éditeur Godot (`Éditeur` -> `Paramètres de l'éditeur...` -> `Export` -> `Android`) :
-   * `Android SDK Path` : ex. `C:/Users/<Username>/AppData/Local/Android/Sdk`
-   * `Debug Keystore` : chemin absolu vers votre `debug.keystore`
-   * `Debug Keystore User` : `androiddebugkey`
-   * `Debug Keystore Password` : `android`
+3. **Clé de signature de débogage (debug keystore) ou de release :**
+   * Pour le débogage :
+     ```powershell
+     keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
+     ```
+   * Pour la release (Google Play Store), le script `scripts/build_aab.py` provisionne automatiquement `output/keystores/release.keystore`.
 
-#### Commande de compilation APK :
+#### Compilation de l'APK (Installation directe / Débogage / Sideloading) :
+Le preset `Android APK` est configuré avec l'architecture `arm64-v8a` par défaut pour une taille optimisée (~58 Mo).
 ```powershell
-godot_console.exe --headless --path . --export-release "Android" dist/les_cartes_magiques.apk
+godot_console.exe --headless --path . --export-release "Android APK" dist/les_cartes_magiques.apk
 ```
 Pour installer directement sur un appareil ou émulateur Android connecté par USB :
 ```powershell
 adb install -r dist/les_cartes_magiques.apk
 ```
+
+#### Compilation de l'Android App Bundle (.aab pour Google Play Store) :
+```powershell
+python scripts/build_aab.py
+```
+Le bundle final optimisé (~59 Mo) est automatiquement compilé et copié dans `play_store_assets/les_cartes_magiques.aab`.
 
 ---
 
@@ -106,6 +108,31 @@ mkdir -p dist/ios
 godot --headless --path . --export-release "iOS" dist/ios/les_cartes_magiques.ipa
 ```
 Ouvrez ensuite le projet généré dans Xcode pour le signer avec votre compte développeur Apple et le déployer sur iPhone/iPad.
+
+---
+
+## 🗜️ Optimisation de la Taille des Paquets & Gestion des Médias Originaux
+
+Le projet intègre une stratégie ciblée de réduction de taille sans compromis sur la qualité visuelle :
+
+### 1. Synthèse des Optimisations Appliquées
+
+| Composant | Avant | Après | Statut & Arbitrage Qualité |
+| :--- | :--- | :--- | :--- |
+| **Vidéos Récompenses (`.ogv`)** | 58.7 Mo | **58.7 Mo** | **Qualité native préservée :** compression Theora désactivée pour éviter tout artefact de compression visuel sur les animations. |
+| **Clips Vocaux (`.mp3`)** | 62.5 Mo | **21.3 Mo** | **Gain majeur (-41 Mo / -66%) :** 874 fichiers vocaux ré-encodés en mono 64 kbps (qualité vocale transparente sans perte perceptible). |
+| **Dépollution Export (`tmp/*`)** | 6.2 Mo | **0 Mo** | **Gain de 6.2 Mo (-100%) :** exclusion systématique des vidéos et captures de test dans `export_presets.cfg`. |
+| **Architecture Native (`.so`)** | 72.7 Mo (3 ABIs) | **23.3 Mo** | **Gain de 49 Mo (-68%) :** ciblage `arm64-v8a` par défaut pour l'APK direct (évite de tripler le poids du moteur). |
+
+### 2. Préservation des Médias Originaux Haute Définition (`assets_original/`)
+
+Afin de garantir la pérennité des assets :
+* **Emplacement des masters :** Tous les fichiers sources audio et vidéo sont archivés intacts dans `assets_original/` (`assets_original/videos/` et `assets_original/audio/`).
+* **Protection Godot via `.gdignore` :** Le fichier `assets_original/.gdignore` signale au moteur Godot d'ignorer ce répertoire lors de l'indexation de l'éditeur et lors de l'exportation des paquets.
+* **Pipeline d'optimisation automatisé :** En cas d'ajout de nouvelles voix, l'optimisation audio se relance en une seule commande (sans toucher aux vidéos) :
+  ```powershell
+  python scripts/optimize_assets.py
+  ```
 
 ---
 
