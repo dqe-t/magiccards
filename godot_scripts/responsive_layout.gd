@@ -220,8 +220,12 @@ static func compute_config_grid_metrics(viewport_w: int, viewport_h: int, system
 		g.pad = clampi(int(round(float(g.box_size) * 0.08)), 6, 14)
 	else:
 		var desk_scale: float = minf(float(viewport_w) / 1920.0, float(viewport_h) / 1080.0)
-		g.box_size = clampi(int(round(46.0 * desk_scale)), 32, 54)
-		g.pad = clampi(int(round(float(g.box_size) * 0.15)), 4, 18)
+		# On 15.6" laptop and 27"+ desktop, size boxes to comfortably fill ~88% of viewport width across 26 columns
+		var target_w: float = float(viewport_w) * 0.88
+		var target_pad: int = clampi(int(round(8.0 * desk_scale)), 6, 12)
+		var calc_box: int = int(floor((target_w - float(g.columns_per_row - 1) * float(target_pad)) / float(g.columns_per_row)))
+		g.box_size = clampi(calc_box, 56, 66)
+		g.pad = target_pad
 
 	var group_gap: int = maxi(g.pad + 6, int(round(float(g.box_size) * (0.16 if diag_in <= 12.0 else 0.35))))
 	var alpha_block_h: int = rows_per_alpha * g.box_size + (rows_per_alpha - 1) * g.pad

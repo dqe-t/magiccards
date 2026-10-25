@@ -34,6 +34,13 @@ godot_console.exe --path . -- --windowed --width 1280 --height 800 --screen-inch
 godot_console.exe --headless --path . -s res://tests/godot/test_runner.gd
 ```
 
+### 3. Run Automated Multi-Screen Screenshot Matrix
+Captures all game views across 8 device form factors (desktop, tablet, phones, ultrawide) and generates a Markdown inspection report:
+```powershell
+python scripts/capture_screenshots.py
+```
+Output report: `output/device_screenshots_report.md` (screenshots stored in `output/screenshots/`).
+
 ---
 
 ## 📦 Export & Distribution

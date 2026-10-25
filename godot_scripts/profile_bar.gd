@@ -76,8 +76,8 @@ func _init(
 func rebuild_layout(p_back_btn_rect: Rect2i) -> void:
 	self.button_rects.clear()
 	var is_desktop_large: bool = (self.screen_w >= 1600 and self.screen_h >= 900)
-	var max_w: int = 250 if is_desktop_large else 160
-	var min_w: int = 140 if is_desktop_large else 130
+	var max_w: int = 320 if is_desktop_large else 220
+	var min_w: int = 160 if is_desktop_large else 145
 
 	var side_clearance: int = p_back_btn_rect.end.x + 20
 	var available_span: int = maxi(200, self.screen_w - side_clearance - 16)
@@ -88,9 +88,10 @@ func rebuild_layout(p_back_btn_rect: Rect2i) -> void:
 	var btn_w: int = clampi(target_btn_w, min_w, max_w)
 	var total_w: int = PROFILE_COUNT * btn_w + total_gap
 
-	var btn_h: int = clampi(int(round(float(p_back_btn_rect.size.y) * 0.95)), 72, 88) if is_desktop_large else clampi(p_back_btn_rect.size.y - 6, 36, 50)
+	var min_h: int = 72 if is_desktop_large else 54
+	var btn_h: int = clampi(maxi(min_h, int(round(float(p_back_btn_rect.size.y) * 0.92))), min_h, 108)
 	var top_y: int = p_back_btn_rect.position.y + (p_back_btn_rect.size.y - btn_h) / 2
-	self.font_size = clampi(int(round(float(btn_h) * 0.36)), 24, 30) if is_desktop_large else clampi(int(round(float(btn_h) * 0.38)), 11, 17)
+	self.font_size = clampi(int(round(float(btn_h) * 0.44)), 22, 46)
 
 	var start_x: int
 	if total_w <= available_span:
