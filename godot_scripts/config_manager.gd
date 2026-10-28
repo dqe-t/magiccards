@@ -111,8 +111,9 @@ class UserProfile extends RefCounted:
 
 		var ask_names: bool = bool(data.get("ask_letter_names", true))
 		var ask_sounds: bool = bool(data.get("ask_letter_sounds", false))
-		var lang_fr: bool = bool(data.get("lang_french", true))
-		var lang_en: bool = bool(data.get("lang_english", false))
+		var is_fr: bool = ConfigManager.is_system_french()
+		var lang_fr: bool = bool(data.get("lang_french", is_fr))
+		var lang_en: bool = bool(data.get("lang_english", not is_fr))
 
 		return UserProfile.new(p_name, typed_symbols, ask_names, ask_sounds, lang_fr, lang_en)
 

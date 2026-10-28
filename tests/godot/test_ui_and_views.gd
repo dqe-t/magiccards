@@ -449,11 +449,27 @@ func _test_dynamic_bilingual_titles_and_localization(host_control: Control) -> v
 	var menu_en: MainMenuView = MainMenuView.new(1920, 1080, 96, 27.0)
 	assert_eq_str(menu_en.get_title_text(), "MAGIC CARDS", "MainMenuView uses English title")
 
-	# Profile-driven title resolution
+	# System language primacy for menu title
 	var p_fr_only: ConfigManager.UserProfile = ConfigManager.UserProfile.new("Alice", ["A", "B", "C", "D", "E"], true, false, true, false)
 	var p_en_only: ConfigManager.UserProfile = ConfigManager.UserProfile.new("Bob", ["A", "B", "C", "D", "E"], true, false, false, true)
-	assert_eq_str(MainMenuView.get_title_for_profile_or_system(p_fr_only), "LES CARTES MAGIQUES", "Title for French-only profile is LES CARTES MAGIQUES")
-	assert_eq_str(MainMenuView.get_title_for_profile_or_system(p_en_only), "MAGIC CARDS", "Title for English-only profile is MAGIC CARDS")
+	assert_eq_str(MainMenuView.get_title_for_profile_or_system(p_fr_only), "MAGIC CARDS", "Title for en_US is MAGIC CARDS regardless of profile language")
+	assert_eq_str(MainMenuView.get_title_for_profile_or_system(p_en_only), "MAGIC CARDS", "Title for en_US is MAGIC CARDS for English profile")
+	assert_eq_str(MainMenuView.get_title_for_profile_or_system(null), "MAGIC CARDS", "Title for null profile in en_US falls back safely to MAGIC CARDS")
+
+	ConfigManager.set_test_locale_override("fr_FR")
+	assert_eq_str(MainMenuView.get_title_for_profile_or_system(p_en_only), "LES CARTES MAGIQUES", "Title for fr_FR is LES CARTES MAGIQUES regardless of profile language")
+	assert_eq_str(MainMenuView.get_title_for_profile_or_system(null), "LES CARTES MAGIQUES", "Title for null profile in fr_FR falls back safely to LES CARTES MAGIQUES")
+
+	# Failure edge cases: UserProfile.from_dict fallback when language fields are absent
+	var empty_lang_dict: Dictionary = {"name": "NoLang", "selected_symbols": ["A", "B", "C", "D", "E"]}
+	var p_missing_fr: ConfigManager.UserProfile = ConfigManager.UserProfile.from_dict(empty_lang_dict, "NoLang")
+	assert_true(p_missing_fr.lang_french, "UserProfile.from_dict defaults to French when locale is French")
+	assert_false(p_missing_fr.lang_english, "UserProfile.from_dict has English false when locale is French")
+
+	ConfigManager.set_test_locale_override("en_US")
+	var p_missing_en: ConfigManager.UserProfile = ConfigManager.UserProfile.from_dict(empty_lang_dict, "NoLang")
+	assert_false(p_missing_en.lang_french, "UserProfile.from_dict has French false when locale is English")
+	assert_true(p_missing_en.lang_english, "UserProfile.from_dict defaults to English when locale is English")
 
 	# ConfigView mode toggle text in English vs French
 	var test_cfg_path: String = "user://test_localization_config.json"

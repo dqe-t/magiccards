@@ -142,12 +142,7 @@ static func get_default_title() -> String:
 	return "LES CARTES MAGIQUES" if ConfigManager.is_system_french() else "MAGIC CARDS"
 
 
-static func get_title_for_profile_or_system(profile: ConfigManager.UserProfile) -> String:
-	if profile != null:
-		if profile.lang_french and not profile.lang_english:
-			return "LES CARTES MAGIQUES"
-		if profile.lang_english and not profile.lang_french:
-			return "MAGIC CARDS"
+static func get_title_for_profile_or_system(_profile: ConfigManager.UserProfile = null) -> String:
 	return get_default_title()
 
 
